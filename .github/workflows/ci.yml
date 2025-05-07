@@ -1,4 +1,4 @@
-name: Java Build Pipeline
+name: Java CI
 
 on:
   push:
@@ -17,10 +17,23 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
           distribution: 'temurin'
+          java-version: '17'
 
-      - name: Run build script
+      - name: Run Checkstyle
+        run: echo "Checkstyle would run here (requires setup)"
+
+      - name: Compile Java code
+        run: javac -d out $(find src -name "*.java")
+
+      - name: Generate Javadoc
         run: |
-          chmod +x build.sh
-          ./build.sh
+          mkdir -p docs
+          javadoc -d docs $(find src -name "*.java")
+
+      - name: Compile and run tests
+        run: |
+          mkdir -p test-classes
+          javac -cp .:src:lib/* -d test-classes $(find src/test -name "*.java")
+          java -jar lib/junit-platform-console-standalone-*.jar \
+            -cp out:test-classes --scan-classpath
