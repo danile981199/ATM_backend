@@ -23,27 +23,22 @@ jobs:
       - name: Compile Java source files
         run: |
           mkdir -p out
-          # Exclude ATMSystem.java from compilation
-          find src -name "*.java" ! -name "ATMSystem.java" -exec javac -cp "lib/*" -d out {} +
+          javac -cp "lib/*" -d out $(find src/main -name "*.java")
 
       - name: Compile test classes
         run: |
           mkdir -p test-classes
-          # Exclude ATMSystem.java from test compilation
-          find test -name "*.java" ! -name "ATMSystemTest.java" -exec javac -cp "lib/*:out" -d test-classes {} +
+          javac -cp "lib/*:out" -d test-classes $(find src/test -name "*.java")
 
       - name: Run unit tests
         run: |
-          java -cp "out:test-classes:lib/*" org.junit.runner.JUnitCore YourTestClassName
+          java -jar lib/junit-platform-console-standalone-*.jar \
+            --class-path out:test-classes \
+            --scan-class-path
 
       - name: Generate Javadoc
         run: |
           mkdir -p docs
-          javadoc -cp "lib/*" -d docs $(find src -name "*.java")
+          javadoc -cp "lib/*" -d docs $(find src/main -name "*.java")
 
-
-      - name: Upload Javadoc
-        uses: actions/upload-artifact@v3
-        with:
-          name: javadoc
-          path: docs
+  
