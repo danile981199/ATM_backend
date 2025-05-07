@@ -1,34 +1,48 @@
-name: Java Build Pipeline
+name: Java CI
 
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout source code
         uses: actions/checkout@v3
 
-      - name: Set up Java
+      - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
           java-version: '17'
+          distribution: 'temurin'
 
-      - name: Compile Java source code
-        run: javac -cp "lib/*" -d out $(find src -name "*.java")
+      - name: Compile Java source files
+        run: |
+          mkdir -p out
+          javac -cp "lib/*" -d out $(find src/main -name "*.java")
+
+      - name: Compile test classes
+        run: |
+          mkdir -p test-classes
+          javac -cp "lib/*:out" -d test-classes $(find src/test -name "*.java")
 
       - name: Run unit tests
-        run: java -jar lib/junit-platform-console-standalone-1.10.0.jar --class-path out --scan-class-path
+        run: |
+          java -jar lib/junit-platform-console-standalone-*.jar \
+            --class-path out:test-classes \
+            --scan-class-path
 
       - name: Generate Javadoc
-        run: javadoc -cp "lib/*" -d out/javadoc $(find src -name "*.java")
+        run: |
+          mkdir -p docs
+          javadoc -cp "lib/*" -d docs $(find src/main -name "*.java")
 
       - name: Upload Javadoc
         uses: actions/upload-artifact@v3
         with:
           name: javadoc
-          path: out/javadoc
+          path: docs
