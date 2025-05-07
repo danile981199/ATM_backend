@@ -1,7 +1,7 @@
 package main;
 
-import services.ATMService;
 import java.util.Scanner;
+import services.ATMService;
 
 public class ATMSystem {
     public static void main(String[] args) {
