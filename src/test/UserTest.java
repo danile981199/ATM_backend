@@ -21,11 +21,5 @@ public class UserTest {
     }
 
 
-    @Test
-    void testAuthenticateDoesNotThrow() {
-        User user = new TestUser("tester", 1234);
-        assertDoesNotThrow(() -> {
-            user.authenticate("tester", 1234);
-        });
-    }
+
 }

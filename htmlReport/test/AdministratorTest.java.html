@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdministratorTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">CustomerTest Coverage Results, DatabaseServiceTest Coverage Results, AdministratorTest Coverage Results, AdministratorTest Coverage Results, AdministratorTest Coverage Results, AdministratorTest Coverage Results, AdministratorTest Coverage Results, AdministratorTest Coverage Results, AdministratorTest Coverage Results, AdministratorTest Coverage Results, AdministratorTest Coverage Results, AdministratorTest Coverage Results, AdministratorTest Coverage Results, AdministratorTest Coverage Results, test in ATM_backend Coverage Results, test in ATM_backend Coverage Results, test in ATM_backend Coverage Results, test in ATM_backend Coverage Results, test in ATM_backend Coverage Results</a> &gt; <a href="index.source.html" class="el_package">test</a> &gt; <span class="el_source">AdministratorTest.java</span></div><h1>AdministratorTest.java</h1><pre class="source lang-java linenums">package test;
+import services.DatabaseService;
+
+import models.Administrator;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+<span class="nc" id="L8">public class AdministratorTest {</span>
+
+    @Test
+    void testAdministratorConstructor() {
+<span class="nc" id="L12">        Administrator admin = new Administrator(&quot;admin&quot;, 1111);</span>
+<span class="nc" id="L13">        assertNotNull(admin);</span>
+<span class="nc" id="L14">    }</span>
+
+    @Test
+    void testCreateAccountDoesNotThrow() {
+<span class="nc" id="L18">        Administrator admin = new Administrator(&quot;admin&quot;, 1111);</span>
+
+        // Generate a unique login for each test run
+<span class="nc" id="L21">        String login = &quot;testuser_&quot; + System.currentTimeMillis();</span>
+
+<span class="nc" id="L23">        assertDoesNotThrow(() -&gt; {</span>
+<span class="nc" id="L24">            admin.createAccount(login, 1234, 100.0);</span>
+<span class="nc" id="L25">        });</span>
+
+        // Optional: clean up
+<span class="nc" id="L28">        DatabaseService.deleteUser(login);</span>
+<span class="nc" id="L29">    }</span>
+
+
+    @Test
+    void testDeleteAccountDoesNotThrow() {
+<span class="nc" id="L34">        Administrator admin = new Administrator(&quot;admin&quot;, 1111);</span>
+<span class="nc" id="L35">        assertDoesNotThrow(() -&gt; {</span>
+<span class="nc" id="L36">            admin.deleteAccount(&quot;ghost&quot;);</span>
+<span class="nc" id="L37">        });</span>
+<span class="nc" id="L38">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
