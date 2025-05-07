@@ -1,4 +1,4 @@
-name: Java CI
+name: Java CI with MySQL
 
 on:
   push:
@@ -10,34 +10,76 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: atm_db
+          MYSQL_USER: root
+          MYSQL_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping --silent" --health-start-period=10s
+
     steps:
+      # Step to check out your repository
       - name: Checkout source code
         uses: actions/checkout@v3
 
+      # Set up JDK for Java 17
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
 
+      # Compile Java source files
       - name: Compile Java source files
         run: |
           mkdir -p out
           javac -cp "lib/*" -d out $(find src -name "*.java")
 
+      # Compile test classes
       - name: Compile test classes
         run: |
           mkdir -p test-classes
           javac -cp "lib/*:out" -d test-classes $(find src/test -name "*.java")
 
+      # Wait for MySQL to be ready
+      - name: Wait for MySQL to be ready
+        run: |
+          # Wait for MySQL to be fully ready
+          sleep 20
+          # Check the status of MySQL
+          mysqladmin -h 127.0.0.1 -P 3306 -u root -proot ping
+
+      # Set up environment variables for MySQL connection
+      - name: Set up MySQL environment variables
+        run: |
+          echo "DB_URL=jdbc:mysql://localhost:3306/atm_db?serverTimezone=UTC" >> $GITHUB_ENV
+          echo "DB_USER=root" >> $GITHUB_ENV
+          echo "DB_PASSWORD=root" >> $GITHUB_ENV
+
+      # Run unit tests
       - name: Run unit tests
         run: |
           java -cp "lib/*:out:test-classes" org.junit.platform.console.ConsoleLauncher --scan-classpath
-      
+        env:
+          DB_URL: jdbc:mysql://localhost:3306/atm_db?serverTimezone=UTC
+          DB_USER: root
+          DB_PASSWORD: root
 
+      # Generate Javadoc
       - name: Generate Javadoc
         run: |
           mkdir -p docs
           javadoc -cp "lib/*" -d docs $(find src/main -name "*.java")
 
+      # Optional: Initialize MySQL database schema and insert test data
+      - name: Set up MySQL schema
+        run: |
+          sleep 10
+          # Create schema (run schema.sql if required)
+          mysql -h 127.0.0.1 -P 3306 -u root -proot atm_db < ./path/to/your/schema.sql
   
