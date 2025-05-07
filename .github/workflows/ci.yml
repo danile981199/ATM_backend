@@ -1,44 +1,40 @@
-name: Java CI
+name: Java CI Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout source code
         uses: actions/checkout@v3
 
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
           java-version: '17'
+          distribution: 'temurin'
+
+      - name: Compile Java source code
+        run: |
+          mkdir -p out
+          javac -cp "lib/*" -d out $(find src -name "*.java")
 
       - name: Run Checkstyle
-        run: echo "Checkstyle would run here (requires setup)"
+        run: |
+          java -jar lib/checkstyle-10.3-all.jar -c /google_checks.xml src/
 
-      - name: Compile Java code
-        run: javac -d out $(find src -name "*.java")
+      - name: Run JUnit tests
+        run: |
+          java -jar lib/junit-platform-console-standalone-1.10.0.jar \
+            --class-path out \
+            --scan-class-path
 
       - name: Generate Javadoc
         run: |
-          mkdir -p docs
-          javadoc -d docs $(find src -name "*.java")
-
-      - steps:
-          - name: Compile Java code
-            run: |
-              mkdir -p out
-              javac -cp "lib/*" -d out $(find src -name "*.java")
-          - name: Run unit tests
-            run: |
-              java -jar lib/junit-platform-console-standalone-1.10.0.jar \
-                --class-path out \
-                --scan-class-path
-        
+          javadoc -d docs -cp lib/* $(find src -name "*.java")
