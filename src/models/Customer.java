@@ -1,42 +1,54 @@
 package models;
 
+
 import services.DatabaseService;
 
 public class Customer extends User {
+
     private double balance;
-    public Customer(String login, int pin,double balance) {
+    private boolean isTest = false;
+
+    // For production use (syncs with DB)
+    public Customer(String login, int pin, double balance) {
         super(login, pin);
         this.balance = balance;
+        DatabaseService.updateBalance(login, balance);
     }
 
-    private double getBalance() {
-        return balance;
+    // For unit testing (no DB)
+    public Customer(String login, int pin, double balance, boolean isTest) {
+        super(login, pin);
+        this.balance = balance;
+        this.isTest = isTest;
     }
 
-
-
-    public void withdrawCash(double amount) {
-        double balance = DatabaseService.getBalance(login);
-        if (amount > 0 && amount <= balance) {
-            DatabaseService.updateBalance(login, balance - amount);
-            System.out.println("Cash Successfully Withdrawn: " + amount);
-        } else {
-            System.out.println("Invalid amount or insufficient balance.");
+    public boolean withdrawCash(double amount) {
+        double currentBalance = isTest ? balance : DatabaseService.getBalance(login);
+        if (amount > 0 && amount <= currentBalance) {
+            if (isTest) {
+                balance -= amount;
+            } else {
+                DatabaseService.updateBalance(login, currentBalance - amount);
+            }
+            return true;
         }
+        return false;
     }
 
-    public void depositCash(double amount) {
+    public boolean depositCash(double amount) {
         if (amount > 0) {
-            double balance = DatabaseService.getBalance(login);
-            DatabaseService.updateBalance(login, balance + amount);
-            System.out.println("Cash Deposited Successfully: " + amount);
-        } else {
-            System.out.println("Invalid deposit amount.");
+            if (isTest) {
+                balance += amount;
+            } else {
+                double currentBalance = DatabaseService.getBalance(login);
+                DatabaseService.updateBalance(login, currentBalance + amount);
+            }
+            return true;
         }
+        return false;
     }
 
-    public void displayBalance() {
-        double balance = DatabaseService.getBalance(login);
-        System.out.println("Current Balance: " + balance);
+    public double getBalance() {
+        return isTest ? balance : DatabaseService.getBalance(login);
     }
 }

@@ -63,8 +63,9 @@ public class ATMService {
                 customer.depositCash(scanner.nextDouble());
                 break;
             case 3:
-                customer.displayBalance();
+                System.out.println("Current Balance: " + customer.getBalance());
                 break;
+
             case 4:
                 System.out.println("Goodbye!");
                 return;
