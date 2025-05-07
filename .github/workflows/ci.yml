@@ -38,4 +38,4 @@ jobs:
       - name: Generate Javadoc
         run: |
           mkdir -p docs
-          javadoc -cp "lib/*" -d docs $(find src/main -name "*.java")
+          javadoc -cp "lib/*" -d docs $(find src -name "*.java")
