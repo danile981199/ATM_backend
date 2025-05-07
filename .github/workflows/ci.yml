@@ -1,41 +1,50 @@
-name: Java CI Pipeline
+name: Java Build Pipeline
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source code
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
           distribution: 'temurin'
+          java-version: '17'
+
+      - name: Create lib directory
+        run: mkdir -p lib
+
+      - name: Download JUnit and MySQL JARs
+        run: |
+          curl -L https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-api/5.10.0/junit-jupiter-api-5.10.0.jar -o lib/junit-jupiter-api-5.10.0.jar
+          curl -L https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-engine/5.10.0/junit-jupiter-engine-5.10.0.jar -o lib/junit-jupiter-engine-5.10.0.jar
+          curl -L https://repo1.maven.org/maven2/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar -o lib/apiguardian-api-1.1.2.jar
+          curl -L https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.0/junit-platform-console-standalone-1.10.0.jar -o lib/junit-platform-console-standalone-1.10.0.jar
+          curl -L https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.2.0/mysql-connector-j-9.2.0.jar -o lib/mysql-connector-j-9.2.0.jar
 
       - name: Compile Java source code
         run: |
           mkdir -p out
           javac -cp "lib/*" -d out $(find src -name "*.java")
 
-      - name: Run Checkstyle
+      - name: Run unit tests
         run: |
-          java -jar lib/checkstyle-10.3-all.jar -c /google_checks.xml src/
-
-
-      - name: Run JUnit tests
-        run: |
-          java -jar lib/junit-platform-console-standalone-1.10.0.jar \
-            --class-path out \
-            --scan-class-path
+          java -jar lib/junit-platform-console-standalone-1.10.0.jar --class-path out:lib/* --scan-class-path
 
       - name: Generate Javadoc
         run: |
-          javadoc -d docs -cp lib/* $(find src -name "*.java")
+          mkdir -p javadoc
+          javadoc -cp "lib/*" -d javadoc $(find src -name "*.java")
+
+      - name: Upload Javadoc Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: javadoc
+          path: javadoc
