@@ -28,6 +28,12 @@ jobs:
       - name: Run Checkstyle
         run: |
           java -jar lib/checkstyle-10.3-all.jar -c /google_checks.xml src/
+      
+
+      - name: Download Checkstyle
+        run: |
+          curl -L -o lib/checkstyle-10.3-all.jar https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.3/checkstyle-10.3-all.jar
+
 
       - name: Run JUnit tests
         run: |
