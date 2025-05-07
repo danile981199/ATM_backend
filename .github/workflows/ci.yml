@@ -31,9 +31,14 @@ jobs:
           mkdir -p docs
           javadoc -d docs $(find src -name "*.java")
 
-      - name: Compile and run tests
-        run: |
-          mkdir -p test-classes
-          javac -cp .:src:lib/* -d test-classes $(find src/test -name "*.java")
-          java -jar lib/junit-platform-console-standalone-*.jar \
-            -cp out:test-classes --scan-classpath
+      - steps:
+          - name: Compile Java code
+            run: |
+              mkdir -p out
+              javac -cp "lib/*" -d out $(find src -name "*.java")
+          - name: Run unit tests
+            run: |
+              java -jar lib/junit-platform-console-standalone-1.10.0.jar \
+                --class-path out \
+                --scan-class-path
+        

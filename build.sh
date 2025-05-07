@@ -1,21 +1,14 @@
 #!/bin/bash
-set -e  # exit if any command fails
 
-echo "Formatting check..."
-# You can add a formatter here if desired
+echo "Running Checkstyle..."
+java -jar lib/checkstyle-10.3-all.jar -c /google_checks.xml src/
 
-echo "Compiling Java files..."
-mkdir -p out
-# Exclude test directory
-find src -name "*.java" ! -path "src/test/*" > compile_sources.txt
-javac -d out @compile_sources.txt
+echo "Compiling..."
+javac -cp "lib/*" -d out $(find src -name "*.java")
 
-echo "Compilation successful."
+echo "Generating JavaDoc..."
+javadoc -d docs -cp "lib/*" $(find src -name "*.java")
 
-echo "Generating documentation..."
-find src -name "*.java" ! -path "src/test/*" > doc_sources.txt
-javadoc -d docs @doc_sources.txt
+echo "Running Tests..."
+java -jar lib/junit-platform-console-standalone-1.10.0.jar --class-path out --scan-class-path
 
-echo "Javadoc generated at docs/index.html"
-
-echo "Run unit tests in IntelliJ manually if needed"
